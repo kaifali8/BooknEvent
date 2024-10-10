@@ -22,9 +22,9 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/user" element={<MyProfile />} />
         //Here can be change with '/user/bookings'
-        <Route path="/bookings" element={<Bookings />} />
-        <Route path="/bookmarks" element={<Bookmarks />} />
-        <Route path="/event/:eveName" element={<Event />} />
+        <Route path="/bookings/:id" element={<Bookings />} />
+        <Route path="/bookmarks/:id" element={<Bookmarks />} />
+        <Route path="/event/:id" element={<Event />} />
         <Route path="/test2/:id" element={<Test2 />} />
         <Route path="/test" element={<Test />} />
       </Routes>

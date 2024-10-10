@@ -1,8 +1,36 @@
-import React, { useContext } from "react";
-import { AppContext } from "../context/context";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 
 const Bookmarks = () => {
-  const { events } = useContext(AppContext);
+  const { id } = useParams(); // Get 'id' param from the URL
+  const [bookmarks, setbookmarks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch user bookmarks when component mounts
+  useEffect(() => {
+    const fetchUserbookmarks = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/bookmarks/user/${id}`
+        );
+        setbookmarks(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching user bookmarks:", error);
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+
+    fetchUserbookmarks();
+  }, [id]); // `userId` dependency ensures the request is made when the userId changes
+
+  // Render a loading state or error message if necessary
+  if (loading) return <p>Loading bookmarks...</p>;
+  if (error) return <p>Error loading bookmarks: {error}</p>;
+
   return (
     <div>
       <div>
@@ -10,25 +38,41 @@ const Bookmarks = () => {
           My Event Bookmarks
         </p>
         <div>
-          {events.slice(0, 3).map((item, index) => (
+          {bookmarks.map((item) => (
             <div
               className="grid grid-cols-[1fr_2fr] gap-4 sm:flex sm:gap-6 py-2 border-b"
-              key={index}
+              key={item.bookmarkId}
             >
               <div>
-                <img className="w-28 bg-indigo-50" src={item.poster} alt="" />
+                <img
+                  className="w-28 bg-indigo-50"
+                  src={item.eventPoster}
+                  alt=""
+                />
               </div>
               <div className="flex-1 text-sm text-zinc-600">
-                <p className="text-lg font-medium">{item.name}</p>
-                <p className="text-md">{item.category}</p>
+                <p className="text-lg font-medium">{item.eventName}</p>
+                <p className="text-md">{item.eventCategory}</p>
                 <p className="mt-6 font-medium">Address:</p>
                 <p>
-                  {item.address.line1} - {item.city}
+                  {item.eventLocation} - {item.eventCity}
                 </p>
                 <div className="mt-6 flex flex-auto">
-                  <p className="font-medium">Date & Time</p>
-                  <span className="font-sm">
-                    : {item.date} | {item.time}
+                  <p className="font-medium">Date & Time:</p>
+                  <span className="pl-1 font-sm">
+                    {new Date(item.eventDate).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}{" "}
+                    |{" "}
+                    {new Date(
+                      "1970-01-01T" + item.eventTime
+                    ).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
                   </span>
                 </div>
               </div>

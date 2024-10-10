@@ -71,33 +71,6 @@ export const assets = {
     razorpay_logo
 }
 
-// export const specialityData = [
-//     {
-//         speciality: 'General physician',
-//         image: General_physician
-//     },
-//     {
-//         speciality: 'Gynecologist',
-//         image: Gynecologist
-//     },
-//     {
-//         speciality: 'Dermatologist',
-//         image: Dermatologist
-//     },
-//     {
-//         speciality: 'Pediatricians',
-//         image: Pediatricians
-//     },
-//     {
-//         speciality: 'Neurologist',
-//         image: Neurologist
-//     },
-//     {
-//         speciality: 'Gastroenterologist',
-//         image: Gastroenterologist
-//     },
-// ]
-
 export const events = [
     {
         _id: 1,

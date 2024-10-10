@@ -57,13 +57,13 @@ const Navbar = () => {
                   My Profile
                 </p>
                 <p
-                  onClick={() => navigate("/bookings")}
+                  onClick={() => navigate("/bookings/" + 101)}
                   className="hover:text-black text-gray-400 cursor-pointer"
                 >
                   My Bookings
                 </p>
                 <p
-                  onClick={() => navigate("/bookmarks")}
+                  onClick={() => navigate("/bookmarks/101")}
                   className="hover:text-black text-gray-400 cursor-pointer"
                 >
                   My Bookmarks

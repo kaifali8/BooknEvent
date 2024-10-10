@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AppContext } from "../context/context";
+import axios from "axios";
 
 const Events = () => {
   const [filterEve, setFilterEve] = useState([]);
@@ -10,10 +10,23 @@ const Events = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const navigate = useNavigate();
-  const { events } = useContext(AppContext);
+  const [events, setEvents] = useState([]);
 
-  const applyFilter = () => {
-    let filteredEvents = events;
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/api/events")
+      .then((response) => {
+        console.log(response.data); // Check the API response here
+        setEvents(response.data); // Adjust this based on the response structure
+        setFilterEve(response.data); // Initially, set all events as filtered events
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the events!", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    let filteredEvents = [...events];
 
     // Filter by category
     if (category) {
@@ -30,14 +43,12 @@ const Events = () => {
     }
 
     // Filter by price range
-    if (priceRange) {
-      filteredEvents = filteredEvents.filter(
-        (eve) => eve.price >= 0 && eve.price <= priceRange
-      );
-    }
+    filteredEvents = filteredEvents.filter((eve) => eve.price <= priceRange);
 
+    // Update the filtered events list
     setFilterEve(filteredEvents);
-  };
+  }, [category, selectedCity, priceRange, events]);
+
   const handleCategoryChange = (category) => {
     setCategory(category);
   };
@@ -53,10 +64,6 @@ const Events = () => {
   const filteredSuggestions = events.filter((event) =>
     event.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  useEffect(() => {
-    applyFilter();
-  }, [events, category, selectedCity, priceRange]);
 
   return (
     <div>
@@ -94,7 +101,7 @@ const Events = () => {
                 <div
                   key={event._id}
                   className="cursor-pointer px-4 py-2 hover:bg-gray-100"
-                  onClick={() => navigate(`/event/${event.name}`)}
+                  onClick={() => navigate(`/event/${event.id}`)}
                 >
                   {event.name}
                 </div>
@@ -265,26 +272,27 @@ const Events = () => {
         </div>
         {/* ---events grid--- */}
         <div className="w-full grid grid-cols-auto pl-5 gap-4 gap-y-6">
-          {filterEve.map((item, index) => (
-            <div
-              onClick={() => navigate("/event/" + item.name)}
-              className="overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500"
-              key={index}
-            >
-              <img className="bg-blue-50 rounded-xl" src={item.poster} />
-              <div className="p-4">
-                <div>
-                  <p className="text-gray-900 text-lg font-medium">
-                    {item.name}
-                  </p>
-                  <div className="flex justify-between items-center gap-2 text-gray-600 text-sm text-center">
-                    <p>{item.city}</p>
-                    <p>Rs.{item.price}</p>
+          {Array.isArray(filterEve) &&
+            filterEve.map((event) => (
+              <div
+                onClick={() => navigate("/event/" + event.id)}
+                className="overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500"
+                key={event.id}
+              >
+                <img className="bg-blue-50 rounded-xl" src={event.poster} />
+                <div className="p-4">
+                  <div>
+                    <p className="text-gray-900 text-lg font-medium">
+                      {event.name}
+                    </p>
+                    <div className="flex justify-between items-center gap-2 text-gray-600 text-sm text-center">
+                      <p>{event.city}</p>
+                      <p>Rs.{event.price}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>
