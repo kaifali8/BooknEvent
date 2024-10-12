@@ -12,7 +12,6 @@ const TrendingEvents = () => {
       .then((response) => {
         console.log(response.data); // Check the API response here
         setEvents(response.data); // Adjust this based on the response structure
-        setFilterEve(response.data); // Initially, set all events as filtered events
       })
       .catch((error) => {
         console.error("There was an error fetching the events!", error);

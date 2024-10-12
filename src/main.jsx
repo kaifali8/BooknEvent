@@ -1,14 +1,17 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.jsx'
-import './index.css'
-import {BrowserRouter} from 'react-router-dom'
-import AppContextProvider from './context/context.jsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.jsx";
+import "./index.css";
+import { BrowserRouter } from "react-router-dom";
+import AppContextProvider from "./context/context.jsx";
+import { UserProvider } from "./UserContext.jsx";
 
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById("root")).render(
   <BrowserRouter>
-  <AppContextProvider>
-    <App />
-  </AppContextProvider>
-  </BrowserRouter>,
-)
+    <AppContextProvider>
+      <UserProvider>
+        <App />
+      </UserProvider>
+    </AppContextProvider>
+  </BrowserRouter>
+);

@@ -4,9 +4,10 @@ import axios from "axios";
 
 const Bookmarks = () => {
   const { id } = useParams(); // Get 'id' param from the URL
-  const [bookmarks, setbookmarks] = useState([]);
+  const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [removingBookmark, setRemovingBookmark] = useState(null);
 
   // Fetch user bookmarks when component mounts
   useEffect(() => {
@@ -15,7 +16,7 @@ const Bookmarks = () => {
         const response = await axios.get(
           `http://localhost:8080/api/bookmarks/user/${id}`
         );
-        setbookmarks(response.data);
+        setBookmarks(response.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching user bookmarks:", error);
@@ -26,6 +27,31 @@ const Bookmarks = () => {
 
     fetchUserbookmarks();
   }, [id]); // `userId` dependency ensures the request is made when the userId changes
+
+  // Function to delete a bookmark
+  const handleDeleteBookmark = async (bookmarkId, eventId) => {
+    try {
+      // Start removal animation for this bookmark
+      setRemovingBookmark(bookmarkId);
+      console.log(id + " - " + eventId);
+      // Call the DELETE API to remove the bookmark
+      await axios.delete(
+        `http://localhost:8080/api/bookmarks/user/${id}/event/${eventId}`
+      );
+
+      // Wait for transition to finish before actually removing from state
+      setTimeout(() => {
+        // Update the bookmarks list to remove the deleted one
+        setBookmarks((prevBookmarks) =>
+          prevBookmarks.filter((bookmark) => bookmark.bookmarkId !== bookmarkId)
+        );
+        setRemovingBookmark(null); // Reset removing state
+      }, 300); // Match the duration of your CSS transition (300ms)
+    } catch (error) {
+      console.error("Error deleting bookmark:", error);
+      setRemovingBookmark(null); // Reset removing state on error
+    }
+  };
 
   // Render a loading state or error message if necessary
   if (loading) return <p>Loading bookmarks...</p>;
@@ -80,8 +106,21 @@ const Bookmarks = () => {
                 <button className="border rounded-md px-12 py-2 mb-2 text-white bg-primary hover:scale-105 transition-all">
                   Buy Now
                 </button>
-                <button className="border rounded-md px-12 py-2 hover:scale-105 transition-all">
-                  Remove Bookmark
+                <button
+                  className="border rounded-md px-12 py-2 hover:scale-105 transition-all"
+                  onClick={() => {
+                    if (item.eventId) {
+                      // Check if eventId exists
+                      handleDeleteBookmark(item.bookmarkId, item.eventId);
+                    } else {
+                      console.error("eventId is missing for bookmark:", item);
+                    }
+                  }}
+                  disabled={removingBookmark === item.bookmarkId}
+                >
+                  {removingBookmark === item.bookmarkId
+                    ? "Removing..."
+                    : "Remove Bookmark"}
                 </button>
               </div>
             </div>

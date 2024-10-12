@@ -3,26 +3,68 @@ import { useParams } from "react-router-dom";
 import { assets } from "../assets/assets_frontend/assets";
 import RelatedEvents from "../components/RelatedEvents";
 import axios from "axios";
+import { useUser } from "../UserContext";
 
 const Event = () => {
+  const { user } = useUser();
   const { id } = useParams(); // Get 'id' param from the URL
   const [event, setEvent] = useState(null); // State to hold event data
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
-
   const [noTicket, setNoTicket] = useState(1);
-  const [bookmark, setBookmark] = useState(
-    "https://img.icons8.com/?size=100&id=qePzjQLJYgjF&format=png&color=000000"
-  );
+  const [bookmarkAdded, setBookmarkAdded] = useState(false);
+  const [bookmark, setBookmark] = useState(assets.bookmark);
+  const [statusMessage, setStatusMessage] = useState(null);
 
-  const handleBookmark = () => {
-    myBookmark();
-    setBookmark(
-      "https://img.icons8.com/?size=100&id=mah7DGc4GwAU&format=png&color=000000"
-    );
-  };
-  const myBookmark = () => {
-    console.log("Bookmark added");
+  // Check if the event is already bookmarked when the component loads
+  useEffect(() => {
+    const checkIfBookmarked = async () => {
+      if (user) {
+        try {
+          const response = await axios.get(
+            `http://localhost:8080/api/bookmarks/${user.id}/events/${id}`
+          );
+          if (response.data.isBookmarked) {
+            setBookmarkAdded(true);
+            setBookmark(assets.bookmarked);
+          }
+        } catch (error) {
+          console.error("Error checking bookmark status:", error);
+        }
+      }
+    };
+
+    checkIfBookmarked();
+  }, [user, id]);
+
+  const handleBookmark = async () => {
+    if (user) {
+      try {
+        if (bookmarkAdded) {
+          // Remove bookmark if already added
+          await axios.delete(
+            `http://localhost:8080/api/bookmarks/user/${user.id}/event/${id}`
+          );
+          setBookmark(assets.bookmark);
+          setBookmarkAdded(false);
+          setStatusMessage("Bookmark removed successfully!");
+        } else {
+          // Add bookmark if not already added
+          await axios.post(
+            `http://localhost:8080/api/bookmarks?userId=${user.id}&eventId=${id}`
+          );
+          setBookmark(assets.bookmarked);
+          setBookmarkAdded(true);
+          setStatusMessage("Event bookmarked successfully!");
+        }
+        // Automatically hide the status message after 3 seconds
+        setTimeout(() => setStatusMessage(null), 3000);
+      } catch (error) {
+        console.error("Error updating bookmark:", error);
+      }
+    } else {
+      alert("You need to log in to bookmark events!");
+    }
   };
 
   const increaseTicket = () => {
@@ -80,6 +122,11 @@ const Event = () => {
               alt="bookmark"
               onClick={handleBookmark}
             />
+            {statusMessage && (
+              <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-cyan-100 text-gray-800 px-4 py-2 rounded shadow-lg">
+                {statusMessage}
+              </div>
+            )}
           </div>
 
           <hr />
@@ -95,7 +142,7 @@ const Event = () => {
                     alt=""
                   />
                   <p>
-                    Location - {event.address} -{event.city}
+                    {event.location} -{event.city}
                   </p>
                 </div>
                 {/* -- Time --*/}

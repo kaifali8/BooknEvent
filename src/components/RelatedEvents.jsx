@@ -1,22 +1,35 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/context";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const RelatedEvents = ({ category, eveName }) => {
-  const { events } = useContext(AppContext);
   const navigate = useNavigate();
+  const [events, setEvents] = useState([]);
 
   const [relEve, setRelEve] = useState([]);
 
   useEffect(() => {
-    if (eveName && category) {
-      const eventData = events.filter(
+    axios
+      .get("http://localhost:8080/api/events")
+      .then((response) => {
+        console.log(response.data); // Check the API response here
+        setEvents(response.data); // Adjust this based on the response structure
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the events!", error);
+      });
+  }, []);
+
+  // Filter the related events based on the category and exclude the current event (by eveName)
+  useEffect(() => {
+    if (category && events.length > 0) {
+      const filteredEvents = events.filter(
         (eve) => eve.category === category && eve.name !== eveName
       );
-      setRelEve(eventData);
+      setRelEve(filteredEvents); // Set related events
     }
-    console.log(relEve);
-  }, [events, category, eveName]);
+  }, [category, eveName, events]);
 
   return (
     <div className="flex flex-col items-center gap-4 my-16 text-gray-900 md:mx-10">
@@ -29,7 +42,7 @@ const RelatedEvents = ({ category, eveName }) => {
         {relEve.slice(0, 5).map((item, index) => (
           <div
             onClick={() => {
-              navigate("/event/" + item.name);
+              navigate("/event/" + item.id);
               scrollTo(0, 0);
             }}
             className="overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500"
@@ -48,15 +61,17 @@ const RelatedEvents = ({ category, eveName }) => {
           </div>
         ))}
       </div>
-      <button
-        onClick={() => {
-          navigate("/events");
-          scrollTo(0, 0);
-        }}
-        className="bg-blue-50 text-gray-600 px-12 py-3 rounded-full mt-10"
-      >
-        more
-      </button>
+      {relEve.length > 5 && (
+        <button
+          onClick={() => {
+            navigate("/events");
+            scrollTo(0, 0);
+          }}
+          className="bg-blue-50 text-gray-600 px-12 py-3 rounded-full mt-10"
+        >
+          More
+        </button>
+      )}
     </div>
   );
 };
