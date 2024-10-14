@@ -39,7 +39,7 @@ const Navbar = () => {
           <li className="py-1">EVENTS</li>
           <hr className="border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden" />
         </NavLink>
-        <NavLink to="/register">
+        <NavLink to="/admin/login">
           <li className="py-1">REGISTER EVENT</li>
           <hr className="border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden" />
         </NavLink>
